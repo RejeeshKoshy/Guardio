@@ -8,3 +8,13 @@ Pillow
 python-dotenv
 cryptography
 google-generativeai
+cryptography
+Flask
+Flask-Bcrypt
+Flask-Login
+Flask-SQLAlchemy
+google-generativeai
+Pillow
+pyotp
+python-dotenv
+qrcode
