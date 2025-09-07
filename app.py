@@ -23,13 +23,18 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# Load keys from environment variables
-SECRET_KEY = os.getenv('SECRET_KEY')
-ENCRYPTION_KEY = os.getenv('ENCRYPTION_KEY')
-GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
+# Load keys from environment variables with fallbacks
+from cryptography.fernet import Fernet
+import secrets
 
-if not all([SECRET_KEY, ENCRYPTION_KEY, GEMINI_API_KEY]):
-    raise ValueError("One or more required environment variables are not set.")
+# Generate defaults if not set
+SECRET_KEY = os.getenv('SECRET_KEY') or secrets.token_urlsafe(32)
+ENCRYPTION_KEY = os.getenv('ENCRYPTION_KEY') or Fernet.generate_key().decode()
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')  # Optional - can be None
+
+print(f"App starting with SECRET_KEY: {'SET' if SECRET_KEY else 'NOT SET'}")
+print(f"App starting with ENCRYPTION_KEY: {'SET' if ENCRYPTION_KEY else 'NOT SET'}")
+print(f"App starting with GEMINI_API_KEY: {'SET' if GEMINI_API_KEY else 'NOT SET - AI features disabled'}")
 
 app.config['SECRET_KEY'] = SECRET_KEY
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///mfa_app.db'
@@ -39,7 +44,11 @@ app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'pool_timeout': 30}
 
 # --- AI and Encryption Setup ---
 fernet = Fernet(ENCRYPTION_KEY.encode())
-genai.configure(api_key=GEMINI_API_KEY)
+if GEMINI_API_KEY:
+    genai.configure(api_key=GEMINI_API_KEY)
+    print("✅ AI features enabled")
+else:
+    print("⚠️  AI features disabled - no GEMINI_API_KEY provided")
 
 # --- Extensions Initialization ---
 db = SQLAlchemy(app)
@@ -59,6 +68,8 @@ def admin_required(f):
 
 def analyze_file_with_ai(file_data, filename):
     """Sends file content to Gemini for analysis."""
+    if not GEMINI_API_KEY:
+        return "AI analysis unavailable - no API key configured"
     try:
         model = genai.GenerativeModel('gemini-1.5-flash')
         content_preview = file_data.decode('utf-8', errors='ignore')
@@ -972,4 +983,10 @@ def logout():
     return redirect(url_for('landing'))
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Create database tables if they don't exist
+    with app.app_context():
+        db.create_all()
+        print("✅ Database initialized")
+    
+    # Run on all interfaces for Replit compatibility
+    app.run(host='0.0.0.0', port=5000, debug=True)
