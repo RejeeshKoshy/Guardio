@@ -56,6 +56,15 @@ bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
+# --- Custom Jinja2 Filters ---
+@app.template_filter('from_json')
+def from_json_filter(value):
+    """Parse JSON string into Python object"""
+    try:
+        return json.loads(value) if isinstance(value, str) and value.startswith('{') else value
+    except (json.JSONDecodeError, TypeError):
+        return value
+
 # --- RBAC Decorator ---
 def admin_required(f):
     @wraps(f)
