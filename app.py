@@ -523,6 +523,15 @@ def create_folder():
         )
         db.session.add(new_folder)
         db.session.commit()
+        
+        # Create audit block for folder creation
+        audit_details = {
+            'folder_name': folder_name,
+            'parent_folder_id': parent_id,
+            'folder_id': new_folder.id
+        }
+        create_audit_block(current_user.id, 'folder_create', audit_details)
+        
         flash(f'Folder "{folder_name}" created successfully.', 'success')
 
     if parent_folder_id:
@@ -575,6 +584,15 @@ def delete_folder(folder_id):
     if folder_to_delete.subfolders or folder_to_delete.files.first():
         flash('Cannot delete a non-empty folder.', 'danger')
         return redirect(url_for('dashboard', folder_id=folder_id))
+    
+    # Create audit block for folder deletion
+    audit_details = {
+        'folder_name': folder_to_delete.name,
+        'folder_id': folder_to_delete.id,
+        'parent_folder_id': folder_to_delete.parent_id
+    }
+    create_audit_block(current_user.id, 'folder_delete', audit_details)
+    
     parent_folder_id = folder_to_delete.parent_id
     db.session.delete(folder_to_delete)
     db.session.commit()
