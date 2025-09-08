@@ -233,4 +233,180 @@ tr:hover {
     display: flex;
     justify-content: center;
     gap: 20px;
+    flex-wrap: wrap;
+}
+
+/* --- Responsive Design --- */
+@media (max-width: 1200px) {
+    .container {
+        max-width: 960px;
+    }
+}
+
+@media (max-width: 992px) {
+    .container {
+        max-width: 720px;
+    }
+    
+    .hero h1 {
+        font-size: 2.8rem;
+    }
+    
+    .nav {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .nav-links {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 15px;
+    }
+    
+    .nav-links a {
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        max-width: 540px;
+        padding: 0 15px;
+    }
+    
+    .hero {
+        padding: 50px 0;
+    }
+    
+    .hero h1 {
+        font-size: 2.2rem;
+    }
+    
+    .hero p {
+        font-size: 1.1rem;
+    }
+    
+    .hero-buttons {
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .btn {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+    
+    .nav {
+        padding: 10px 0;
+    }
+    
+    .logo {
+        font-size: 1.3rem;
+    }
+    
+    .nav-links {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .admin-dropdown {
+        position: static;
+        display: block;
+        box-shadow: none;
+        border: none;
+        background: transparent;
+        min-width: auto;
+        padding: 0;
+    }
+    
+    .admin-nav:hover .admin-dropdown {
+        display: block;
+    }
+    
+    table {
+        font-size: 0.85rem;
+    }
+    
+    th, td {
+        padding: 8px;
+    }
+    
+    .form-container {
+        padding: 20px;
+    }
+    
+    .form-group label {
+        font-size: 0.9rem;
+    }
+    
+    .form-group input, .form-group textarea, .form-group select {
+        font-size: 0.9rem;
+        padding: 8px;
+    }
+}
+
+@media (max-width: 576px) {
+    .container {
+        max-width: 100%;
+        padding: 0 10px;
+    }
+    
+    .hero h1 {
+        font-size: 1.8rem;
+    }
+    
+    .hero p {
+        font-size: 1rem;
+    }
+    
+    .form-container {
+        padding: 15px;
+        margin: 10px;
+    }
+    
+    .btn {
+        padding: 8px 16px;
+        font-size: 0.85rem;
+        width: 100%;
+        text-align: center;
+    }
+    
+    .nav {
+        padding: 8px 0;
+    }
+    
+    .logo {
+        font-size: 1.2rem;
+    }
+    
+    .nav-links a {
+        font-size: 0.9rem;
+    }
+    
+    table {
+        font-size: 0.8rem;
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    
+    th, td {
+        padding: 6px;
+        min-width: 80px;
+    }
+    
+    .flash-success, .flash-danger {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+    
+    .hero-buttons {
+        width: 100%;
+    }
+    
+    .hero-buttons .btn {
+        min-width: 200px;
+    }
 }
