@@ -46,23 +46,23 @@
 
     <!-- Log Statistics -->
     <div class="log-stats">
-        <div class="stat-item">
-            <span class="stat-number">{{ logs | length }}</span>
-            <span class="stat-label">Total Entries</span>
-        </div>
-        <div class="stat-item">
-            <span class="stat-number">{{ logs | selectattr('level', 'equalto', 'ERROR') | list | length }}</span>
-            <span class="stat-label">Errors</span>
-        </div>
-        <div class="stat-item">
-            <span class="stat-number">{{ logs | selectattr('level', 'equalto', 'WARNING') | list | length }}</span>
-            <span class="stat-label">Warnings</span>
-        </div>
-        <div class="stat-item">
-            <span class="stat-number">{{ logs | selectattr('level', 'equalto', 'INFO') | list | length }}</span>
-            <span class="stat-label">Info</span>
-        </div>
+    <div class="stat-item">
+        <span class="stat-number">{{ total_entries }}</span>
+        <span class="stat-label">Total Entries</span>
     </div>
+    <div class="stat-item">
+        <span class="stat-number">{{ errors }}</span>
+        <span class="stat-label">Errors</span>
+    </div>
+    <div class="stat-item">
+        <span class="stat-number">{{ warnings }}</span>
+        <span class="stat-label">Warnings</span>
+    </div>
+    <div class="stat-item">
+        <span class="stat-number">{{ info }}</span>
+        <span class="stat-label">Info</span>
+    </div>
+</div>
 
     <!-- Logs Table -->
     <div class="logs-container">

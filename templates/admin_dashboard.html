@@ -64,7 +64,7 @@
             <a href="{{ url_for('admin_settings') }}" class="btn btn-secondary">⚙️ Settings</a>
             <a href="{{ url_for('admin_logs') }}" class="btn btn-secondary">📊 View Logs</a>
             <a href="{{ url_for('admin_audit_trail') }}" class="btn btn-secondary">⛓️ Audit Trail</a>
-            <button onclick="exportUserData()" class="btn btn-secondary">📈 Export Data</button>
+            <a href="{{ url_for('admin_export_data') }}" class="btn btn-secondary">📈 Export Data</a>
             <button onclick="showSystemHealth()" class="btn btn-secondary">🏥 System Health</button>
         </div>
     </div>

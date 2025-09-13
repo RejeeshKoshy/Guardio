@@ -17,6 +17,10 @@ import google.generativeai as genai
 import pyotp
 import qrcode
 
+import zipfile
+import csv
+import io
+
 load_dotenv()
 
 # --- App Initialization and Configuration ---
@@ -240,6 +244,32 @@ def detect_tampering():
             tampering_report['overall_status'] = 'TAMPERED'
     
     return tampering_report
+
+# --- Log Retrieval Function ---
+def get_all_audit_logs():
+    """Retrieves and formats all audit blocks for the logs page."""
+    # Retrieve all audit blocks and join with the User table
+    all_blocks = AuditBlock.query.join(User).order_by(AuditBlock.timestamp.desc()).all()
+    
+    logs = []
+    for block in all_blocks:
+        # Determine log level based on action type
+        level = "INFO"
+        if "error" in block.action or "fail" in block.action:
+            level = "ERROR"
+        elif "warning" in block.action:
+            level = "WARNING"
+            
+        logs.append({
+            "timestamp": block.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
+            "level": level,
+            "user": block.user.username,
+            "action": block.action.replace('_', ' ').title(),
+            "details": block.details,
+            "block_id": block.id
+        })
+    return logs
+
 # --- Database Models ---
 
 class User(db.Model, UserMixin):
@@ -824,6 +854,63 @@ def delete_user(user_id):
     flash(f'User {username} and all their data have been deleted.', 'success')
     return redirect(url_for('admin_dashboard'))
 
+@app.route('/admin/export-data')
+@login_required
+@admin_required
+def admin_export_data():
+    """Exports all user data to a zip file containing CSVs."""
+    memory_file = io.BytesIO()
+    with zipfile.ZipFile(memory_file, 'w') as zf:
+        # Export Users
+        users = User.query.all()
+        user_data = io.StringIO()
+        user_writer = csv.writer(user_data)
+        user_writer.writerow(['ID', 'Username', 'Email', 'Role'])
+        for user in users:
+            user_writer.writerow([user.id, user.username, user.email, user.role])
+        zf.writestr('users.csv', user_data.getvalue())
+
+        """
+        # Export Files
+        files = File.query.all()
+        file_data = io.StringIO()
+        file_writer = csv.writer(file_data)
+        file_writer.writerow(['ID', 'Filename', 'Owner ID', 'Folder ID', 'AI Summary'])
+        for file in files:
+            file_writer.writerow([file.id, file.filename, file.user_id, file.folder_id, file.ai_summary])
+        zf.writestr('files.csv', file_data.getvalue())
+
+        # Export Folders
+        folders = Folder.query.all()
+        folder_data = io.StringIO()
+        folder_writer = csv.writer(folder_data)
+        folder_writer.writerow(['ID', 'Name', 'Owner ID', 'Parent ID'])
+        for folder in folders:
+            folder_writer.writerow([folder.id, folder.name, folder.user_id, folder.parent_id])
+        zf.writestr('folders.csv', folder_data.getvalue())
+
+        # Export Password Entries
+        passwords = PasswordEntry.query.all()
+        password_data = io.StringIO()
+        password_writer = csv.writer(password_data)
+        password_writer.writerow(['ID', 'Website', 'Username', 'Owner ID'])
+        for p in passwords:
+            password_writer.writerow([p.id, p.website, p.username, p.user_id])
+        zf.writestr('passwords.csv', password_data.getvalue())
+        """
+        # Export Audit Blocks
+        audits = AuditBlock.query.all()
+        audit_data = io.StringIO()
+        audit_writer = csv.writer(audit_data)
+        audit_writer.writerow(['ID', 'User ID', 'Action', 'Timestamp', 'Details', 'Hash', 'Previous Hash'])
+        for a in audits:
+            audit_writer.writerow([a.id, a.user_id, a.action, a.timestamp, a.details, a.block_hash, a.previous_hash])
+        zf.writestr('audit_log.csv', audit_data.getvalue())
+
+    memory_file.seek(0)
+    return send_file(memory_file, download_name='guardio_export.zip', as_attachment=True)
+    
+    
 @app.route('/admin/system-stats')
 @login_required
 @admin_required
@@ -899,11 +986,15 @@ def admin_backup():
 @admin_required
 def admin_logs():
     """View system logs."""
-    # In a real application, this would query actual log files or a logging database
-    # For now, we'll show a message that logs are not yet implemented
-    logs = []
+    logs = get_all_audit_logs()
     
-    return render_template('admin_logs.html', logs=logs)
+    # Calculate stats for the dashboard
+    total_entries = len(logs)
+    errors = len([log for log in logs if log['level'] == 'ERROR'])
+    warnings = len([log for log in logs if log['level'] == 'WARNING'])
+    info = total_entries - errors - warnings
+    
+    return render_template('admin_logs.html', logs=logs, total_entries=total_entries, errors=errors, warnings=warnings, info=info)
 
 @app.route('/admin/audit-trail')
 @login_required
