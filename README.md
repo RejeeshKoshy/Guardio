@@ -79,7 +79,8 @@ Follow these steps to set up and run a local instance of Guardio.
 2.  **Activate Virtual Environment:**
     ```bash
     python3 -m venv venv
-    source venv/bin/activate
+    source venv/bin/activate #for linux
+    venv\Scripts\activate #for windows
     ```
 
 3.  **Install Dependencies:**
